@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import click
+import datetime
 import logging
 import m3u8
 import os
@@ -31,14 +32,17 @@ def setuplog(verbose):
 
 
 def download_file(uri, outputdir, filename):
-    """Download a ts file and save on the outputdir as outputdir/filename"""
+    """Download a ts video and save on the outputdir as the following file:
+    outputdir/date_filename"""
     try:
-        fpath = os.path.join(outputdir, filename)
+        date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        fpath = os.path.join(outputdir, date + "_" + filename)
         with open(fpath, "wb") as file:
             logger.info("DOWNLOADING FILE: " + uri)
             response = get(uri)
             file.write(response.content)
-            logger.debug("FINISHED DOWNLOADING FILE: " + uri)
+
+            logger.debug("FINISHED WRITING " + uri + " TO FILE: " + fpath)
     except Exception as ex:
         logger.error(ex)
 
