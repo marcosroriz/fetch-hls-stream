@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import click
 import logging
 import os
 import tempfile
 
+import click
+from ffmpy import FFmpeg
 
 # Logger
 logger = logging.getLogger("join_stream")
@@ -24,7 +25,7 @@ def setuplog(verbose):
 @click.command()
 @click.option('--input', default="./", type=click.Path(exists=True),
               help="Input directory containing downloaded videos")
-@click.option('--output', default='out.mp4', help='Output Video File')
+@click.option('--output', default='outmerge.mp4', help='Output Video File')
 @click.option('--verbose', is_flag=True, help="Verbose")
 def join_stream(input, output, verbose):
     """Join a list of downloaded TS video files from a given directory (output)
@@ -33,12 +34,13 @@ def join_stream(input, output, verbose):
     setuplog(verbose)
 
     # Create temp file to store all videos
-    tfd, tpath = tempfile.mkstemp()
+    tfd, tpath = tempfile.mkstemp(suffix=".ts")
     logger.debug("Created temp file at: " + tpath)
 
     with open(tpath, "wb") as tfile:
         # Reading video files in input directory
         dirfilenames = sorted(os.listdir(input))
+        logger.info("Reading input files...")
 
         for videofname in dirfilenames:
             if videofname.endswith(".ts"):
@@ -49,8 +51,26 @@ def join_stream(input, output, verbose):
 
                 logger.debug("Finished reading file: " + videofname)
 
+        logger.info("Finished reading all video TS files")
         tfile.flush()
         os.fsync(tfile.fileno())
+
+        ff = FFmpeg(
+            global_options=[
+                '-y',
+                '-loglevel error'
+            ],
+            inputs={tpath: None},
+            outputs={output: '-acodec copy -vcodec copy'}
+        )
+
+        logger.info("Running FFMPEG tool to convert the file")
+        logger.debug("FFMPEG CLI: " + ff.cmd)
+
+        ff.run()
+
+        logger.debug("Finished FFMPEG conversion")
+        logger.info("Output video file: " + output)
 
 
 if __name__ == '__main__':
