@@ -39,10 +39,7 @@ For instance, the line below configure the tool to:
 4. If positive, download them to `outdir`
 
 ```
-$ python -m fetch_hls_stream \
-  --url https://example.org/playlist.m3u8 \
-  --output outdir \
-  --freq 10
+$ python -m fetch_hls_stream --url https://example.org/playlist.m3u8 --output outdir --freq 10
 ```
 
 ## Join downloaded videos
@@ -62,9 +59,7 @@ For instance, the line below configure the tool to:
 2. Save them into a single vidoe file called out.mp4
 
 ```
-$ python -m join_stream \
-  --input outdir \
-  --output out.mp4
+$ python -m join_stream --input outdir --output out.mp4
 ```
 
 ## Tests
