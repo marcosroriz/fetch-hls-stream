@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import logging
-
 import click
+import logging
 import m3u8
+import time
+
 
 # Set representing chunks that we have already downloaded
 dlset = set()
@@ -22,7 +23,7 @@ def setuplog(verbose):
 
 @click.command()
 @click.option('--url', help='URL to HLS m3u8 playlist.')
-@click.option('--freq', default=10,
+@click.option('--freq', default=5,
               help="Frequency for downloading the HLS m3u8 stream")
 @click.option('--output', default="./", type=click.Path(exists=True),
               help="Output directory for video files")
@@ -30,9 +31,19 @@ def setuplog(verbose):
 def fetch_hls_stream(url, freq, output, verbose):
     setuplog(verbose)
 
-    dynamicplaylist = m3u8.load(url)
-    for playlist in dynamicplaylist:
-        playlistdata = m3u8.load(playlist.absolute_uri)
+    while True:
+        dynamicplaylist = m3u8.load(url)
+        for playlist in dynamicplaylist.playlists:
+            playlistdata = m3u8.load(playlist.absolute_uri)
+            for videosegment in playlistdata.segments:
+                videouri = videosegment.absolute_uri
+                videofname = videouri.split("_")[-1]
+                if videofname not in dlset:
+                    dlset.add(videofname)
+                    print(videouri)
+                    print(videofname)
+
+        time.sleep(freq)
 
 
 if __name__ == '__main__':
