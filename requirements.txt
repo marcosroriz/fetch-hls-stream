@@ -5,3 +5,4 @@ py==1.4.34
 pytest==3.2.3
 m3u8==0.3.7
 requests==2.18.4
+ffmpy==0.2.2
